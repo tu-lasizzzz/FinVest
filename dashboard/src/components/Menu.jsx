@@ -44,7 +44,7 @@ const Menu = () => {
 
   return (
     <div className="menu-container">
-      <img src="logo.png" style={{ width: "50px" }} alt="Logo" />
+      <img src="logo.svg" style={{ width: "36px", height: "36px" }} alt="FinVest Logo" />
       <div className="menus">
         <ul>
           <li>

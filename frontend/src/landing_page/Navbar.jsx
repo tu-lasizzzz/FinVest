@@ -27,7 +27,7 @@ function Navbar() {
             <img
               src="media/images/logo.svg"
               style={{ width: "130px", display: "block" }}
-              alt="Logo"
+              alt="FinVest Logo"
             />
           </Link>
 
