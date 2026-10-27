@@ -12,10 +12,10 @@ function Footer() {
             <img
               src="media/images/logo.svg"
               style={{ width: "130px" }}
-              alt="Zerodha Logo"
+              alt="FinVest Logo"
             />
             <p className="text-muted mt-3" style={{ fontSize: "0.8rem" }}>
-              &copy; 2010 - 2026, Zerodha Broking Ltd.
+              &copy; 2010 - 2026, FinVest Broking Ltd.
               <br />
               All rights reserved.
             </p>
@@ -88,7 +88,7 @@ function Footer() {
                 Careers
               </a>
               <a href="#" className="text-decoration-none text-muted">
-                Zerodha.tech
+                FinVest.tech
               </a>
             </nav>
           </div>
@@ -120,8 +120,8 @@ function Footer() {
           style={{ fontSize: "0.7rem", lineHeight: "1.6" }}
         >
           <p>
-            Zerodha Broking Ltd.: Member of NSE, BSE​ &​ MCX – SEBI Registration
-            no.: INZ000031633 CDSL/NSDL: Depository services through Zerodha
+            FinVest Broking Ltd.: Member of NSE, BSE​ &​ MCX – SEBI Registration
+            no.: INZ000031633 CDSL/NSDL: Depository services through FinVest
             Broking Ltd. – SEBI Registration no.: IN-DP-431-2019.
           </p>
           <p>

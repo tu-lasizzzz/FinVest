@@ -28,7 +28,7 @@ function CreateTicket() {
             </ul>
           </Topic>
 
-          <Topic title="Your Zerodha Account" icon="fa-user">
+          <Topic title="Your FinVest Account" icon="fa-user">
             <ul
               className="ms-5 mt-3 text-primary"
               style={{ fontSize: "1.1rem" }}

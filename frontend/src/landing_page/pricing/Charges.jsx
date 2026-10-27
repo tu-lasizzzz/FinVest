@@ -159,7 +159,7 @@ function Charges() {
             Charged only on selling side when trading intraday or on F&O.
           </p>
           <p className="text-muted small">
-            When trading at Zerodha, STT/CTT can be a lot more than the
+            When trading at FinVest, STT/CTT can be a lot more than the
             brokerage we charge. Important to keep a tab.
           </p>
 
@@ -225,7 +225,7 @@ function Charges() {
             DP (Depository participant) charges
           </h6>
           <p className="text-muted small">
-            ₹15.34 per scrip (₹3.5 CDSL fee + ₹9.5 Zerodha fee + ₹2.34 GST) is
+            ₹15.34 per scrip (₹3.5 CDSL fee + ₹9.5 FinVest fee + ₹2.34 GST) is
             charged on the trading account ledger when stocks are sold,
             irrespective of quantity.
           </p>

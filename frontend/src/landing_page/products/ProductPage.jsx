@@ -24,7 +24,7 @@ function ProductPage() {
       <RightSection
         imageUrl="media/images/console.png"
         productName="Console"
-        productDescription="The central dashboard for your Zerodha account. Gain insights into your trades and investments with in-depth reports and visualisations."
+        productDescription="The central dashboard for your FinVest account. Gain insights into your trades and investments with in-depth reports and visualisations."
         learnMore=""
       />
 
@@ -62,7 +62,7 @@ function ProductPage() {
         <p className="fs-5 text-muted">
           Want to know more about our technology stack? Check out the{" "}
           <a href="#" style={{ textDecoration: "none" }}>
-            Zerodha.tech
+            FinVest.tech
           </a>{" "}
           blog.
         </p>

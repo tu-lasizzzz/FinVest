@@ -4,7 +4,7 @@ function Hero() {
   return (
     <div className="container border-bottom">
       <div className="row text-center mt-3 mt-md-5 p-4 p-md-5">
-        <h1 className="fs-2 fs-md-1 fw-medium">Zerodha Products</h1>
+        <h1 className="fs-2 fs-md-1 fw-medium">FinVest Products</h1>
         <p className="fs-5 text-muted mt-2">
           Sleek, modern, and intuitive trading platforms
         </p>

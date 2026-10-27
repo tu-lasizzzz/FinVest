@@ -7,7 +7,7 @@ function OpenAccount() {
       <div className="row text-center justify-content-center">
         <div className="col-12 col-md-10">
           <h2 className="mt-5 fs-2 fs-md-1 fw-medium">
-            Open a Zerodha account
+            Open a FinVest account
           </h2>
           <p className="mt-3 fs-5 text-muted">
             Modern platforms and apps, ₹0 investments, and flat ₹20 intraday and

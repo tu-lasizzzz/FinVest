@@ -13,10 +13,49 @@ const { HoldingsModel } = require("./model/HoldingsModel");
 const { PositionsModel } = require("./model/PositionsModel");
 const { OrdersModel } = require("./model/OrdersModel");
 
+// Supabase
+const supabase = require("./supabaseClient");
+
 const PORT = process.env.PORT || 3002;
 const uri = process.env.MONGO_URL;
 
+// Serverless-safe MongoDB Connection Caching
+let cached = global.mongoose;
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
+
+async function dbConnect() {
+  if (cached.conn) {
+    return cached.conn;
+  }
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(uri)
+      .then((mongooseInstance) => {
+        console.log("DB Connected");
+        return mongooseInstance;
+      })
+      .catch((error) => {
+        cached.promise = null;
+        throw error;
+      });
+  }
+  cached.conn = await cached.promise;
+  return cached.conn;
+}
+
 const app = express();
+
+// Middleware to ensure DB connection is ready before any route runs
+app.use(async (req, res, next) => {
+  try {
+    await dbConnect();
+    next();
+  } catch (error) {
+    console.error("DB Connection Error:", error);
+    res.status(500).json({ error: "Database connection failed" });
+  }
+});
 
 // CORS
 app.use(
@@ -48,6 +87,25 @@ app.post("/signup", async (req, res) => {
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "3d",
     });
+
+    // Mirror new user profile to Supabase (password is intentionally NOT stored)
+    try {
+      const { error: userErr } = await supabase.from("users").insert([
+        {
+          mongo_id: user._id.toString(),
+          email: user.email,
+          username: user.username,
+          created_at: user.createdAt
+            ? user.createdAt.toISOString()
+            : new Date().toISOString(),
+        },
+      ]);
+      if (userErr) console.error("Supabase user insert error:", userErr.message);
+      else console.log("✅ New user synced to Supabase:", user.email);
+    } catch (e) {
+      console.error("Supabase user sync failed:", e.message);
+    }
+
   //  res.cookie("token", token, {
   //    httpOnly: false,
   //    secure: true,
@@ -134,6 +192,8 @@ app.get("/allPositions", async (req, res) => {
 
 app.post("/newOrder", async (req, res) => {
   const { name, qty, price, mode } = req.body;
+
+  // ── 1. Save order to MongoDB ──────────────────────────────────────────────
   const newOrder = new OrdersModel({
     name: name,
     qty: qty,
@@ -142,12 +202,51 @@ app.post("/newOrder", async (req, res) => {
   });
   await newOrder.save();
 
+  // ── 2. Mirror order to Supabase ───────────────────────────────────────────
+  try {
+    const { error: orderErr } = await supabase.from("orders").insert([
+      {
+        name: name,
+        qty: Number(qty),
+        price: Number(price),
+        mode: mode,
+        created_at: new Date().toISOString(),
+      },
+    ]);
+    if (orderErr) console.error("Supabase order insert error:", orderErr.message);
+  } catch (e) {
+    console.error("Supabase order sync failed:", e.message);
+  }
+
+  // ── 3. Update MongoDB Holdings & mirror to Supabase ───────────────────────
   let existingHolding = await HoldingsModel.findOne({ name: name });
 
   if (mode === "BUY") {
     if (existingHolding) {
       existingHolding.qty = parseInt(existingHolding.qty) + parseInt(qty);
       await existingHolding.save();
+
+      // Supabase: upsert updated holding
+      try {
+        const { error: holdErr } = await supabase
+          .from("holdings")
+          .upsert(
+            {
+              name: name,
+              qty: existingHolding.qty,
+              avg: existingHolding.avg,
+              price: existingHolding.price,
+              net: existingHolding.net,
+              day: existingHolding.day,
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: "name" }
+          );
+        if (holdErr) console.error("Supabase holding upsert error:", holdErr.message);
+      } catch (e) {
+        console.error("Supabase holding sync failed:", e.message);
+      }
+
       res.send("Buy Order placed. Quantity updated!");
     } else {
       const newHolding = new HoldingsModel({
@@ -159,6 +258,26 @@ app.post("/newOrder", async (req, res) => {
         day: "+0%",
       });
       await newHolding.save();
+
+      // Supabase: insert new holding
+      try {
+        const { error: holdErr } = await supabase.from("holdings").upsert(
+          {
+            name: name,
+            qty: Number(qty),
+            avg: Number(price),
+            price: Number(price),
+            net: "+0%",
+            day: "+0%",
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "name" }
+        );
+        if (holdErr) console.error("Supabase holding insert error:", holdErr.message);
+      } catch (e) {
+        console.error("Supabase holding sync failed:", e.message);
+      }
+
       res.send("Buy Order placed. New Holding created!");
     }
   } else if (mode === "SELL") {
@@ -168,9 +287,43 @@ app.post("/newOrder", async (req, res) => {
       if (currentQty > sellQty) {
         existingHolding.qty = currentQty - sellQty;
         await existingHolding.save();
+
+        // Supabase: update reduced holding
+        try {
+          const { error: holdErr } = await supabase
+            .from("holdings")
+            .upsert(
+              {
+                name: name,
+                qty: existingHolding.qty,
+                avg: existingHolding.avg,
+                price: existingHolding.price,
+                net: existingHolding.net,
+                day: existingHolding.day,
+                updated_at: new Date().toISOString(),
+              },
+              { onConflict: "name" }
+            );
+          if (holdErr) console.error("Supabase holding update error:", holdErr.message);
+        } catch (e) {
+          console.error("Supabase holding sync failed:", e.message);
+        }
+
         res.send("Sell Order placed. Quantity reduced!");
       } else if (currentQty === sellQty) {
         await HoldingsModel.deleteOne({ name: name });
+
+        // Supabase: delete holding (sold out)
+        try {
+          const { error: holdErr } = await supabase
+            .from("holdings")
+            .delete()
+            .eq("name", name);
+          if (holdErr) console.error("Supabase holding delete error:", holdErr.message);
+        } catch (e) {
+          console.error("Supabase holding sync failed:", e.message);
+        }
+
         res.send("Sell Order placed. Holding sold out!");
       } else {
         res
@@ -185,9 +338,13 @@ app.post("/newOrder", async (req, res) => {
   }
 });
 
-// START SERVER
-app.listen(PORT, () => {
-  console.log("App started on port " + PORT);
-  mongoose.connect(uri);
-  console.log("DB Connected");
-});
+// START SERVER (Only bind port locally, Vercel maps this automatically)
+if (process.env.NODE_ENV !== "production") {
+  app.listen(PORT, () => {
+    console.log("App started on port " + PORT);
+    dbConnect(); // Initial connection trigger for local dev logging
+  });
+}
+
+// Export Express app for Vercel Serverless Execution
+module.exports = app;

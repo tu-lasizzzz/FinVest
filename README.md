@@ -1,4 +1,4 @@
-# 📈 Full-Stack Stock Trading Platform
+# 📈 FinVest — Smart Investment & Virtual Trading Platform
 
 ![MERN Stack](https://img.shields.io/badge/Stack-MERN-blue)
 ![React](https://img.shields.io/badge/Frontend-React%20%2B%20Vite-61DAFB)

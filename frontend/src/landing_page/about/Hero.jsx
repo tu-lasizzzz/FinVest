@@ -16,11 +16,10 @@ function Hero() {
         {/* Left Column */}
         <div className="col-12 col-md-6 p-3 p-md-4">
           <p>
-            We kick-started operations on the 15th of August, 2010 with the goal
-            of breaking all barriers that traders and investors face in India in
-            terms of cost, support, and technology. We named the company
-            Zerodha, a combination of Zero and "Rodha", the Sanskrit word for
-            barrier.
+            FinVest was established with the goal of breaking all barriers that
+            traders and investors face in terms of cost, market literacy, and
+            technology. We named the platform FinVest — combining Financial
+            empowerment with smart Investment tools.
           </p>
           <p>
             Today, our disruptive pricing models and in-house technology have
